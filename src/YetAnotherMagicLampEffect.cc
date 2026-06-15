@@ -36,7 +36,7 @@
 static Direction dockEdge(KWin::EffectWindow* dock)
 {
     KWin::VirtualDesktop* desktop = KWin::effects->currentDesktop();
-    KWin::LogicalOutput* screen = KWin::effects->screenAt(
+    KWin::Output* screen = KWin::effects->screenAt(
         dock->frameGeometry().center().toPoint());
     const QRectF screenRect = KWin::effects->clientArea(
         KWin::FullScreenArea, screen, desktop);
@@ -76,7 +76,7 @@ static QRectF resolveIconGeometry(KWin::EffectWindow* w)
 
     // Window center determines the authoritative screen (robust against decorations
     // extending a few pixels into an adjacent screen).
-    KWin::LogicalOutput* primaryScreen = KWin::effects->screenAt(
+    KWin::Output* primaryScreen = KWin::effects->screenAt(
         w->frameGeometry().center().toPoint());
     if (!primaryScreen) {
         return iconRect;
@@ -101,7 +101,7 @@ static QRectF resolveIconGeometry(KWin::EffectWindow* w)
     // If the dock containing the icon is already on the primary screen, the
     // iconGeometry is correct — use it directly.
     if (sourceDock) {
-        KWin::LogicalOutput* sourceDockScreen = KWin::effects->screenAt(
+        KWin::Output* sourceDockScreen = KWin::effects->screenAt(
             sourceDock->frameGeometry().center().toPoint());
         if (sourceDockScreen == primaryScreen) {
             return iconRect;
@@ -125,7 +125,7 @@ static QRectF resolveIconGeometry(KWin::EffectWindow* w)
     Direction preferredEdge = Direction::Bottom;
     if (sourceDock) {
         KWin::VirtualDesktop* desktop = KWin::effects->currentDesktop();
-        KWin::LogicalOutput* srcScreen = KWin::effects->screenAt(
+        KWin::Output* srcScreen = KWin::effects->screenAt(
             sourceDock->frameGeometry().center().toPoint());
         const QRectF srcRect = KWin::effects->clientArea(KWin::FullScreenArea, srcScreen, desktop);
         const QRectF tgtRect = KWin::effects->clientArea(KWin::FullScreenArea, primaryScreen, desktop);
@@ -199,7 +199,7 @@ static QRectF resolveIconGeometry(KWin::EffectWindow* w)
     }
 
     KWin::VirtualDesktop* desktop = KWin::effects->currentDesktop();
-    KWin::LogicalOutput* sourceDockScreen = KWin::effects->screenAt(
+    KWin::Output* sourceDockScreen = KWin::effects->screenAt(
         sourceDock->frameGeometry().center().toPoint());
     const QRectF srcScreenRect = KWin::effects->clientArea(
         KWin::FullScreenArea, sourceDockScreen, desktop);
@@ -331,12 +331,12 @@ void YetAnotherMagicLampEffect::prePaintScreen(KWin::ScreenPrePaintData& data, s
     KWin::effects->prePaintScreen(data, presentTime);
 }
 
-void YetAnotherMagicLampEffect::prePaintWindow(KWin::RenderView* view, KWin::EffectWindow* w, KWin::WindowPrePaintData& data, std::chrono::milliseconds presentTime)
+void YetAnotherMagicLampEffect::prePaintWindow(KWin::EffectWindow* w, KWin::WindowPrePaintData& data, std::chrono::milliseconds presentTime)
 {
     if (m_animations.contains(w)) {
         data.mask |= PAINT_WINDOW_TRANSFORMED;
     }
-    KWin::effects->prePaintWindow(view, w, data, presentTime);
+    KWin::effects->prePaintWindow(w, data, presentTime);
 }
 
 void YetAnotherMagicLampEffect::postPaintScreen()
@@ -357,13 +357,13 @@ void YetAnotherMagicLampEffect::postPaintScreen()
 void YetAnotherMagicLampEffect::paintWindow(const KWin::RenderTarget& renderTarget,
     const KWin::RenderViewport& viewport,
     KWin::EffectWindow* w, int mask,
-    const KWin::Region& region,
+    QRegion region,
     KWin::WindowPaintData& data)
 {
     auto it = m_animations.constFind(w);
     if (it != m_animations.constEnd() && it->model.needsClip()) {
-        const KWin::Region clipLogical(it->model.clipRegion());
-        const KWin::Region clip = viewport.mapToDeviceCoordinatesAligned(clipLogical);
+        const QRegion clipLogical(it->model.clipRegion());
+        const QRegion clip = viewport.mapToRenderTarget(clipLogical);
         KWin::effects->paintWindow(renderTarget, viewport, w, mask, clip, data);
         return;
     }

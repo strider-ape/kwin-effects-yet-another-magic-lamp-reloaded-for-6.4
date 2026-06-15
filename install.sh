@@ -35,8 +35,8 @@ if command -v plasmashell &>/dev/null; then
     plasma_ver=$(plasmashell --version 2>/dev/null | grep -oP '\d+\.\d+(\.\d+)?' | head -1)
     plasma_major=$(echo "$plasma_ver" | cut -d. -f1)
     plasma_minor=$(echo "$plasma_ver" | cut -d. -f2)
-    if [[ "$plasma_major" -lt 6 ]] || { [[ "$plasma_major" -eq 6 ]] && [[ "$plasma_minor" -lt 6 ]]; }; then
-        echo -e "${red}[ERROR]${nc} This effect requires Plasma 6.6 or later."
+    if [[ "$plasma_major" -lt 6 ]] || { [[ "$plasma_major" -eq 6 ]] && [[ "$plasma_minor" -lt 4 ]]; }; then
+        echo -e "${red}[ERROR]${nc} This effect requires Plasma 6.4 or later."
         exit 1
     else
         echo -e "${green}[OK]${nc} Plasma $plasma_ver detected."

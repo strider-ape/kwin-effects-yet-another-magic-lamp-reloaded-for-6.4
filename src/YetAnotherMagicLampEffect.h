@@ -43,11 +43,11 @@ public:
     void reconfigure(ReconfigureFlags flags) override;
 
     void prePaintScreen(KWin::ScreenPrePaintData& data, std::chrono::milliseconds presentTime) override;
-    void prePaintWindow(KWin::RenderView* view, KWin::EffectWindow* w, KWin::WindowPrePaintData& data, std::chrono::milliseconds presentTime) override;
+    void prePaintWindow(KWin::EffectWindow* w, KWin::WindowPrePaintData& data, std::chrono::milliseconds presentTime) override;
     void postPaintScreen() override;
 
     void paintWindow(const KWin::RenderTarget& renderTarget, const KWin::RenderViewport& viewport,
-        KWin::EffectWindow* w, int mask, const KWin::Region& region,
+        KWin::EffectWindow* w, int mask, QRegion region,
         KWin::WindowPaintData& data) override;
 
     bool isActive() const override;

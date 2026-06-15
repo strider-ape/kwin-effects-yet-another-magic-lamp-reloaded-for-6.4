@@ -63,7 +63,7 @@ static Direction realizeDirection(const KWin::EffectWindow* window, const QRectF
     }
 
     // No panel found — fall back to closest screen edge (KDE uses ScreenArea intersect here).
-    KWin::LogicalOutput* screen = KWin::effects->screenAt(iconRect.center().toPoint());
+    KWin::Output* screen = KWin::effects->screenAt(iconRect.center().toPoint());
     KWin::VirtualDesktop* desktop = KWin::effects->currentDesktop();
     const QRectF screenRect = KWin::effects->clientArea(KWin::FullScreenArea, screen, desktop);
     const QPointF c = iconRect.center();

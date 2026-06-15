@@ -1,4 +1,4 @@
-# Yet Another Magic Lamp (Plasma 6.6+)
+# Yet Another Magic Lamp (Plasma 6.4+)
 
 <div align="center">
   <a href="https://youtu.be/i8tt4JLWGy8">
@@ -19,7 +19,7 @@ This project was originally created by [Vlad Zahorodnii](https://github.com/zzag
 Clone the repository and run the install script — it will check and install all required dependencies automatically, then build and install the effect.
 
 ```yaml
-git clone https://github.com/Si13n7/kwin-effects-yet-another-magic-lamp-reloaded.git
+git clone https://github.com/strider-ape/kwin-effects-yet-another-magic-lamp-reloaded.git
 cd kwin-effects-yet-another-magic-lamp-reloaded
 chmod +x ./install.sh
 ./install.sh
@@ -33,7 +33,7 @@ You will need the following dependencies to build this effect:
 * CMake
 * any C++20 enabled compiler
 * Qt 6: Core, DBus, Gui, Widgets
-* KWin (Plasma 6.6 or later)
+* KWin (Plasma 6.4 or later)
 * KDE Frameworks 6:
     - Config
     - ConfigWidgets
@@ -98,7 +98,7 @@ sudo zypper install \
 
 On Debian → Kubuntu, KDE neon, MX Linux, Nitrux
 
-> **Note:** This effect requires KWin 6.6 or later. Building on Debian-based distributions may
+> **Note:** This effect requires KWin 6.4 or later. Building on Debian-based distributions may
 > fail if the KWin version available in the repositories does not meet this requirement.
 
 ```yaml
@@ -120,7 +120,7 @@ After you installed all the required dependencies, you can build
 the effect:
 
 ```yaml
-git clone https://github.com/Si13n7/kwin-effects-yet-another-magic-lamp-reloaded.git
+git clone https://github.com/strider-ape/kwin-effects-yet-another-magic-lamp-reloaded.git
 cd kwin-effects-yet-another-magic-lamp-reloaded
 mkdir build && cd build
 cmake .. \
@@ -133,7 +133,7 @@ sudo make install
 
 #### Building the effect against older Plasma versions
 
-This fork targets **Plasma 6.6 and later** exclusively. For older Plasma (5.x) releases, use the original repository by [zzag](https://github.com/zzag/kwin-effects-yet-another-magic-lamp), which provides dedicated branches per Plasma version.
+This fork targets **Plasma 6.4 and later**. For older Plasma (5.x) releases, use the original repository by [zzag](https://github.com/zzag/kwin-effects-yet-another-magic-lamp), which provides dedicated branches per Plasma version.
 
 **Step 1** — Clone the original repository:
 

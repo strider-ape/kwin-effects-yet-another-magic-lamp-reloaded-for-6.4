@@ -28,18 +28,9 @@
 // Qt
 #include <QPointer>
 
-// std
-#include <memory>
-
-// The visible refs are held through shared_ptr and never assigned: in KWin 6.8,
-// EffectWindowVisibleRef::operator= registers the hold under the *source*
-// object's address, so assigning from a temporary drops the hold immediately
-// and the window vanishes the moment minimize starts.
-using VisibleRefPtr = std::shared_ptr<KWin::EffectWindowVisibleRef>;
-
 struct AnimationData {
     Model model;
-    VisibleRefPtr visibleRef;
+    KWin::EffectWindowVisibleRef visibleRef;
 };
 
 class YetAnotherMagicLampEffect : public KWin::OffscreenEffect {
@@ -82,7 +73,7 @@ private:
 
     QMap<KWin::EffectWindow*, AnimationData> m_animations;
     // Windows waiting for iconGeometry to become valid before animation starts
-    QMap<KWin::EffectWindow*, VisibleRefPtr> m_pendingMinimize;
+    QMap<KWin::EffectWindow*, KWin::EffectWindowVisibleRef> m_pendingMinimize;
 };
 
 inline int YetAnotherMagicLampEffect::requestedEffectChainPosition() const

@@ -350,22 +350,6 @@ void YetAnotherMagicLampEffect::postPaintScreen()
     KWin::effects->postPaintScreen();
 }
 
-bool YetAnotherMagicLampEffect::paintWindow(const KWin::RenderTarget& renderTarget,
-    const KWin::RenderViewport& viewport,
-    KWin::EffectWindow* w, int mask,
-    const KWin::Region& deviceRegion,
-    KWin::WindowPaintData& data)
-{
-    auto it = m_animations.constFind(w);
-    if (it != m_animations.constEnd() && it->model.needsClip()) {
-        const KWin::Region clipLogical(it->model.clipRegion());
-        const KWin::Region clip = viewport.mapToRenderTarget(clipLogical);
-        return KWin::effects->paintWindow(renderTarget, viewport, w, mask, clip, data);
-    }
-
-    return KWin::effects->paintWindow(renderTarget, viewport, w, mask, deviceRegion, data);
-}
-
 void YetAnotherMagicLampEffect::apply(KWin::EffectWindow* window, int mask, KWin::WindowPaintData& data, KWin::WindowQuadList& quads)
 {
     Q_UNUSED(mask)

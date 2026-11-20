@@ -46,10 +46,6 @@ public:
     void prePaintWindow(KWin::RenderView* view, KWin::EffectWindow* w, KWin::WindowPrePaintData& data) override;
     void postPaintScreen() override;
 
-    bool paintWindow(const KWin::RenderTarget& renderTarget, const KWin::RenderViewport& viewport,
-        KWin::EffectWindow* w, int mask, const KWin::Region& deviceRegion,
-        KWin::WindowPaintData& data) override;
-
     bool isActive() const override;
     int requestedEffectChainPosition() const override;
 

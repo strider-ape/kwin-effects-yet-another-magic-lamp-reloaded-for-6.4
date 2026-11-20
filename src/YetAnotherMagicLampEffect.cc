@@ -35,11 +35,9 @@
 // Returns which screen edge a dock panel is closest to.
 static Direction dockEdge(KWin::EffectWindow* dock)
 {
-    KWin::VirtualDesktop* desktop = KWin::effects->currentDesktop();
-    KWin::Output* screen = KWin::effects->screenAt(
+    KWin::LogicalOutput* screen = KWin::effects->screenAt(
         dock->frameGeometry().center().toPoint());
-    const QRectF screenRect = KWin::effects->clientArea(
-        KWin::FullScreenArea, screen, desktop);
+    const QRectF screenRect = KWin::effects->clientArea(KWin::FullScreenArea, screen);
     const QPointF c = dock->frameGeometry().center();
 
     const qreal l = qAbs(c.x() - screenRect.left());
@@ -76,7 +74,7 @@ static QRectF resolveIconGeometry(KWin::EffectWindow* w)
 
     // Window center determines the authoritative screen (robust against decorations
     // extending a few pixels into an adjacent screen).
-    KWin::Output* primaryScreen = KWin::effects->screenAt(
+    KWin::LogicalOutput* primaryScreen = KWin::effects->screenAt(
         w->frameGeometry().center().toPoint());
     if (!primaryScreen) {
         return iconRect;
@@ -101,7 +99,7 @@ static QRectF resolveIconGeometry(KWin::EffectWindow* w)
     // If the dock containing the icon is already on the primary screen, the
     // iconGeometry is correct — use it directly.
     if (sourceDock) {
-        KWin::Output* sourceDockScreen = KWin::effects->screenAt(
+        KWin::LogicalOutput* sourceDockScreen = KWin::effects->screenAt(
             sourceDock->frameGeometry().center().toPoint());
         if (sourceDockScreen == primaryScreen) {
             return iconRect;
@@ -124,11 +122,10 @@ static QRectF resolveIconGeometry(KWin::EffectWindow* w)
     //   → preferredEdge = opposite(Top) = Bottom  → picks the BOTTOM panel of lower screen ✓
     Direction preferredEdge = Direction::Bottom;
     if (sourceDock) {
-        KWin::VirtualDesktop* desktop = KWin::effects->currentDesktop();
-        KWin::Output* srcScreen = KWin::effects->screenAt(
+        KWin::LogicalOutput* srcScreen = KWin::effects->screenAt(
             sourceDock->frameGeometry().center().toPoint());
-        const QRectF srcRect = KWin::effects->clientArea(KWin::FullScreenArea, srcScreen, desktop);
-        const QRectF tgtRect = KWin::effects->clientArea(KWin::FullScreenArea, primaryScreen, desktop);
+        const QRectF srcRect = KWin::effects->clientArea(KWin::FullScreenArea, srcScreen);
+        const QRectF tgtRect = KWin::effects->clientArea(KWin::FullScreenArea, primaryScreen);
 
         const auto closestEdge = [](const QRectF& rect, const QPointF& p) -> Direction {
             const qreal l = qAbs(p.x() - rect.left());
@@ -198,13 +195,10 @@ static QRectF resolveIconGeometry(KWin::EffectWindow* w)
             iconRect.width(), iconRect.height());
     }
 
-    KWin::VirtualDesktop* desktop = KWin::effects->currentDesktop();
-    KWin::Output* sourceDockScreen = KWin::effects->screenAt(
+    KWin::LogicalOutput* sourceDockScreen = KWin::effects->screenAt(
         sourceDock->frameGeometry().center().toPoint());
-    const QRectF srcScreenRect = KWin::effects->clientArea(
-        KWin::FullScreenArea, sourceDockScreen, desktop);
-    const QRectF tgtScreenRect = KWin::effects->clientArea(
-        KWin::FullScreenArea, primaryScreen, desktop);
+    const QRectF srcScreenRect = KWin::effects->clientArea(KWin::FullScreenArea, sourceDockScreen);
+    const QRectF tgtScreenRect = KWin::effects->clientArea(KWin::FullScreenArea, primaryScreen);
 
     const QPointF screenOffset = tgtScreenRect.topLeft() - srcScreenRect.topLeft();
     const QRectF translatedRect = iconRect.translated(screenOffset);
@@ -310,7 +304,7 @@ void YetAnotherMagicLampEffect::reconfigure(ReconfigureFlags flags)
     }
     m_modelParameters.shapeCurve = curve;
 
-    const int baseDuration = animationTime<YetAnotherMagicLampConfig>(std::chrono::milliseconds(300));
+    const int baseDuration = int(animationTime<YetAnotherMagicLampConfig>(std::chrono::milliseconds(300)).count());
     m_modelParameters.squashDuration = std::chrono::milliseconds(baseDuration);
     m_modelParameters.stretchDuration = std::chrono::milliseconds(qMax(qRound(baseDuration * 0.7), 1));
     m_modelParameters.bumpDuration = std::chrono::milliseconds(baseDuration);
@@ -320,23 +314,25 @@ void YetAnotherMagicLampEffect::reconfigure(ReconfigureFlags flags)
     m_gridResolution = YetAnotherMagicLampConfig::gridResolution();
 }
 
-void YetAnotherMagicLampEffect::prePaintScreen(KWin::ScreenPrePaintData& data, std::chrono::milliseconds presentTime)
+void YetAnotherMagicLampEffect::prePaintScreen(KWin::ScreenPrePaintData& data)
 {
+    // KWin 6.8 dropped presentTime; the timeline reads the next presentation
+    // timestamp from the render view instead.
     for (AnimationData& animData : m_animations) {
-        animData.model.advance(presentTime);
+        animData.model.advance(data.view);
     }
 
     data.mask |= PAINT_SCREEN_WITH_TRANSFORMED_WINDOWS;
 
-    KWin::effects->prePaintScreen(data, presentTime);
+    KWin::effects->prePaintScreen(data);
 }
 
-void YetAnotherMagicLampEffect::prePaintWindow(KWin::EffectWindow* w, KWin::WindowPrePaintData& data, std::chrono::milliseconds presentTime)
+void YetAnotherMagicLampEffect::prePaintWindow(KWin::RenderView* view, KWin::EffectWindow* w, KWin::WindowPrePaintData& data)
 {
     if (m_animations.contains(w)) {
         data.mask |= PAINT_WINDOW_TRANSFORMED;
     }
-    KWin::effects->prePaintWindow(w, data, presentTime);
+    KWin::effects->prePaintWindow(view, w, data);
 }
 
 void YetAnotherMagicLampEffect::postPaintScreen()
@@ -354,21 +350,20 @@ void YetAnotherMagicLampEffect::postPaintScreen()
     KWin::effects->postPaintScreen();
 }
 
-void YetAnotherMagicLampEffect::paintWindow(const KWin::RenderTarget& renderTarget,
+bool YetAnotherMagicLampEffect::paintWindow(const KWin::RenderTarget& renderTarget,
     const KWin::RenderViewport& viewport,
     KWin::EffectWindow* w, int mask,
-    QRegion region,
+    const KWin::Region& deviceRegion,
     KWin::WindowPaintData& data)
 {
     auto it = m_animations.constFind(w);
     if (it != m_animations.constEnd() && it->model.needsClip()) {
-        const QRegion clipLogical(it->model.clipRegion());
-        const QRegion clip = viewport.mapToRenderTarget(clipLogical);
-        KWin::effects->paintWindow(renderTarget, viewport, w, mask, clip, data);
-        return;
+        const KWin::Region clipLogical(it->model.clipRegion());
+        const KWin::Region clip = viewport.mapToRenderTarget(clipLogical);
+        return KWin::effects->paintWindow(renderTarget, viewport, w, mask, clip, data);
     }
 
-    KWin::effects->paintWindow(renderTarget, viewport, w, mask, region, data);
+    return KWin::effects->paintWindow(renderTarget, viewport, w, mask, deviceRegion, data);
 }
 
 void YetAnotherMagicLampEffect::apply(KWin::EffectWindow* window, int mask, KWin::WindowPaintData& data, KWin::WindowQuadList& quads)

@@ -1,4 +1,6 @@
-# Yet Another Magic Lamp (Plasma 6.4+)
+# Yet Another Magic Lamp (Plasma 6.8+)
+
+> **Branch `kwin-6.8`:** ported to the KWin 6.8 effect API, where `presentTime` was removed, paint calls take a `RenderView` and `KWin::Region`, and screens are `LogicalOutput`. Use `main` for Plasma 6.4 to 6.7. `install.sh` now builds with 2 jobs inside a 2 GB memory cap (override with `JOBS=` and `MEM_MAX=`) so it can't freeze low-RAM machines.
 
 <div align="center">
   <a href="https://youtu.be/i8tt4JLWGy8">
@@ -33,7 +35,7 @@ You will need the following dependencies to build this effect:
 * CMake
 * any C++20 enabled compiler
 * Qt 6: Core, DBus, Gui, Widgets
-* KWin (Plasma 6.4 or later)
+* KWin (Plasma 6.8 or later on this branch)
 * KDE Frameworks 6:
     - Config
     - ConfigWidgets
@@ -98,7 +100,7 @@ sudo zypper install \
 
 On Debian → Kubuntu, KDE neon, MX Linux, Nitrux
 
-> **Note:** This effect requires KWin 6.4 or later. Building on Debian-based distributions may
+> **Note:** This branch requires KWin 6.8 or later. Building on Debian-based distributions may
 > fail if the KWin version available in the repositories does not meet this requirement.
 
 ```yaml

@@ -35,8 +35,8 @@ if command -v plasmashell &>/dev/null; then
     plasma_ver=$(plasmashell --version 2>/dev/null | grep -oP '\d+\.\d+(\.\d+)?' | head -1)
     plasma_major=$(echo "$plasma_ver" | cut -d. -f1)
     plasma_minor=$(echo "$plasma_ver" | cut -d. -f2)
-    if [[ "$plasma_major" -lt 6 ]] || { [[ "$plasma_major" -eq 6 ]] && [[ "$plasma_minor" -lt 4 ]]; }; then
-        echo -e "${red}[ERROR]${nc} This effect requires Plasma 6.4 or later."
+    if [[ "$plasma_major" -lt 6 ]] || { [[ "$plasma_major" -eq 6 ]] && [[ "$plasma_minor" -lt 8 ]]; }; then
+        echo -e "${red}[ERROR]${nc} This branch requires Plasma 6.8 or later. For Plasma 6.4 to 6.7, use the main branch."
         exit 1
     else
         echo -e "${green}[OK]${nc} Plasma $plasma_ver detected."
@@ -107,7 +107,22 @@ cd "$base"
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
 
-if make -j"$(nproc)"; then
+# Build with few jobs, at low priority, inside a memory cap. `make -j$(nproc)`
+# runs one C++ compiler per CPU thread and can exhaust RAM on machines with
+# many threads but little memory (e.g. 16 threads / 7 GB), freezing the
+# desktop. Override with JOBS=n; set MEM_MAX=infinity to remove the cap.
+jobs="${JOBS:-2}"
+mem_max="${MEM_MAX:-2G}"
+build() {
+    if command -v systemd-run &>/dev/null && systemd-run --user --scope --quiet true &>/dev/null; then
+        systemd-run --user --scope --quiet -p MemoryMax="$mem_max" \
+            nice -n 19 make -j"$jobs"
+    else
+        nice -n 19 make -j"$jobs"
+    fi
+}
+
+if build; then
     if [[ "$EUID" -ne 0 ]]; then
         sudo make install
     else

@@ -425,7 +425,7 @@ void YetAnotherMagicLampEffect::startMinimize(KWin::EffectWindow* w)
         if (m_pendingMinimize.contains(w)) {
             return;
         }
-        m_pendingMinimize[w] = KWin::EffectWindowVisibleRef(w, KWin::EffectWindow::PAINT_DISABLED_BY_MINIMIZE);
+        m_pendingMinimize.insert(w, std::make_shared<KWin::EffectWindowVisibleRef>(w, KWin::EffectWindow::PAINT_DISABLED_BY_MINIMIZE));
         QPointer<KWin::EffectWindow> weakRef(w);
         QTimer::singleShot(150, this, [this, weakRef]() {
             KWin::EffectWindow* win = weakRef.data();
@@ -442,7 +442,7 @@ void YetAnotherMagicLampEffect::startMinimize(KWin::EffectWindow* w)
     animData.model.setParameters(m_modelParameters);
     animData.model.setIconGeometry(resolveIconGeometry(w));
     animData.model.start(Model::AnimationKind::Minimize);
-    animData.visibleRef = KWin::EffectWindowVisibleRef(w, KWin::EffectWindow::PAINT_DISABLED_BY_MINIMIZE);
+    animData.visibleRef = std::make_shared<KWin::EffectWindowVisibleRef>(w, KWin::EffectWindow::PAINT_DISABLED_BY_MINIMIZE);
 
     redirect(w);
 

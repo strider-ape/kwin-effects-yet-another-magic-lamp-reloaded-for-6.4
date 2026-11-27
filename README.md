@@ -1,5 +1,9 @@
 # Yet Another Magic Lamp (Plasma 6.4+)
 
+> **Branch `kwin-6.3`** — builds and loads on Plasma 6.3 (Debian 13 "trixie"). Same code as
+> `master`; the plugin file is named `kwin4_effect_yetanothermagiclamp.so` (no `lib` prefix),
+> because KWin 6.3 takes the effect's id from the file name.
+
 <div align="center">
   <a href="https://youtu.be/i8tt4JLWGy8">
     <img src="https://github.com/user-attachments/assets/616a9a82-1fd1-4477-a436-9be6003c80f2" alt="Demo" />
